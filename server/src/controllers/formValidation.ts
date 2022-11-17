@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as Yup from "yup";
 
 const formSchema = Yup.object({
@@ -12,7 +12,11 @@ const formSchema = Yup.object({
     .max(20, "Password too long"),
 });
 
-export const validateForm = (req: Request, res: Response) => {
+export const validateForm = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const formData = req.body;
   formSchema
     .validate(formData)
@@ -21,6 +25,10 @@ export const validateForm = (req: Request, res: Response) => {
       return res.status(422).send("error");
     })
     .then((valid) => {
-      if (valid) console.log("data is good");
+      if (valid) {
+        console.log("data is good");
+        return next();
+      }
+      return res.status(422).send();
     });
 };

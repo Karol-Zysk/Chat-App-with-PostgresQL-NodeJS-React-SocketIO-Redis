@@ -1,11 +1,15 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import { Button, ButtonGroup, Heading, VStack } from "@chakra-ui/react";
+import { Button, ButtonGroup, Heading, Text, VStack } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import { json, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
+import { useContext, useState } from "react";
+import { AccountContext } from "../AccountContext";
 import * as Yup from "yup";
 import TextField from "./TextField";
 
 const SignUp = () => {
+  const { setUser } = useContext(AccountContext);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   return (
     <Formik
@@ -25,7 +29,7 @@ const SignUp = () => {
         alert(JSON.stringify(values, null, 2));
         actions.resetForm();
         fetch("http://localhost:3000/auth/register", {
-          method: "GET",
+          method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(vals),
@@ -41,7 +45,12 @@ const SignUp = () => {
           })
           .then((data) => {
             if (!data) return;
-            console.log(data);
+            setUser({ ...data });
+            if (data.status) {
+              setError(data.status);
+            } else if (data.loggedIn) {
+              navigate("/home");
+            }
           });
       }}
     >
@@ -54,11 +63,15 @@ const SignUp = () => {
         spacing="1rem"
       >
         <Heading>Sign Up</Heading>
+        <Text as="p" color="red.500">
+          {error}
+        </Text>
         <TextField
           name="username"
           placeholder="Enter username"
           autoComplete="off"
           label="Username"
+          type="text"
         />
 
         <TextField
@@ -66,6 +79,7 @@ const SignUp = () => {
           placeholder="Enter password"
           autoComplete="off"
           label="Password"
+          type="password"
         />
 
         <ButtonGroup pt="1rem">
