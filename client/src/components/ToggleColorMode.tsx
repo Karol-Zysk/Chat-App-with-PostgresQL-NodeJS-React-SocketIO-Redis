@@ -10,7 +10,7 @@ const ToggleColorMode = () => {
       pos="absolute"
       top="0"
       right="0"
-      m="1rem"
+      m="5rem"
     >
       {colorMode === "dark" ? (
         <SunIcon color="orange.200" />
