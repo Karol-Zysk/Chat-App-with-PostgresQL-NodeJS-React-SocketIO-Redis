@@ -6,10 +6,13 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@chakra-ui/modal";
-import { Button, ModalOverlay } from "@chakra-ui/react";
+import { Button, Heading, ModalOverlay } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import TextField from "../TextField";
 import * as Yup from "yup";
+import { useCallback, useContext, useState } from "react";
+import socket from "../../socket";
+import { FriendContext } from "./Home";
 
 const friendSchema = Yup.object({
   friendName: Yup.string()
@@ -24,8 +27,14 @@ interface IFriendModalProps {
 }
 
 const AddFriendModal = ({ isOpen, onClose }: IFriendModalProps) => {
+  const [error, setError] = useState("");
+  const closeModal = useCallback(() => {
+    setError("");
+    onClose();
+  }, [onClose]);
+  const { setFriendList } = useContext(FriendContext);
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={closeModal}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Add a friend!</ModalHeader>
@@ -33,12 +42,27 @@ const AddFriendModal = ({ isOpen, onClose }: IFriendModalProps) => {
         <Formik
           initialValues={{ friendName: "" }}
           onSubmit={(values) => {
-            onClose();
+            socket.emit(
+              "add_friend",
+              values.friendName,
+              ({ errorMsg, done }: { errorMsg: string; done: boolean }) => {
+                if (done) {
+                  //@ts-ignore
+                  setFriendList((c: any) => [values.friendName, ...c]);
+                  closeModal();
+                  return;
+                }
+                setError(errorMsg);
+              }
+            );
           }}
           validationSchema={friendSchema}
         >
           <Form>
             <ModalBody>
+              <Heading fontSize="xl" color="red.500" textAlign="center">
+                {error}
+              </Heading>
               <TextField
                 label="Friend's name"
                 placeholder="Enter friend's username.."

@@ -2,6 +2,7 @@ import { Grid, GridItem, Tabs } from "@chakra-ui/react";
 import { createContext, SetStateAction, useState } from "react";
 import Chat from "./Chat";
 import Sidebar from "./Sidebar";
+import useSocketSetup from "./useSocketSetup";
 
 export interface IFriend {
   id: string;
@@ -24,6 +25,7 @@ const Home = () => {
   const [friendList, setFriendList] = useState([
     { id: "123", username: "John", connected: false },
   ]);
+  useSocketSetup(setFriendList);
 
   return (
     <FriendContext.Provider value={{ friendList, setFriendList }}>

@@ -1,18 +1,28 @@
-import { useContext, useEffect } from "react";
+import { SetStateAction, useContext, useEffect } from "react";
 import socket from "../../socket";
 import { AccountContext } from "../AccountContext";
 
-const useSocketSetup = () => {
+const useSocketSetup = (setFriendList: {
+  (
+    value: SetStateAction<
+      { id: string; username: string; connected: boolean }[]
+    >
+  ): void;
+  (arg0: any): void;
+}) => {
   const { setUser } = useContext(AccountContext);
   useEffect(() => {
     socket.connect();
+    socket.on("friends", (friendList) => {
+      setFriendList(friendList);
+    });
     socket.on("connect_error", () => {
       setUser({ loggedIn: false });
     });
     return () => {
       socket.off("connect_error");
     };
-  }, [setUser]);
+  }, [setUser, setFriendList]);
 };
 
 export default useSocketSetup;

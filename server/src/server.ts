@@ -7,6 +7,12 @@ import { Server, Socket } from "socket.io";
 import { port } from "./config/config";
 import authRouter from "./routes/authRouter";
 import {
+  authorizeUser,
+  initializeUser,
+  addFriend,
+} from "./controllers/socketController";
+import { redisClient } from "./redis";
+import {
   corsConfig,
   sessionMiddleware,
   wrap,
@@ -21,10 +27,10 @@ const io = new Server(server, {
 });
 
 app.use(helmet());
-app.use(cors(corsConfig));
+app.use(cors({ origin: `http://127.0.0.1:5173`, credentials: true }));
 app.use(express.json());
 
-app.use(sessionMiddleware);
+// app.use(sessionMiddleware);
 
 app.get("/", (req, res) => {
   res.send("elo elo");
@@ -32,9 +38,14 @@ app.get("/", (req, res) => {
 
 io.use(wrap(sessionMiddleware));
 io.on("connect", (socket) => {
-//@ts-ignore
-  console.log(socket.request.session.user.username);
+  //@ts-ignore
+  initializeUser(socket);
+
+  socket.on("add_friend", (friendName, cb) => {
+    addFriend(socket, friendName, cb);
+  });
 });
+io.use(authorizeUser);
 
 app.use("/auth", authRouter);
 
