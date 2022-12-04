@@ -1,4 +1,4 @@
-import { redisClient } from "../redis";
+import { redisClient } from "../../redis";
 import { NextFunction, Response, Request } from "express";
 
 export const rateLimiter =

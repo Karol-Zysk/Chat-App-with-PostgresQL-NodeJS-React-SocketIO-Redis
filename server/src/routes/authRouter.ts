@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { isLoggedIn, login, register } from "../controllers/authController";
 import { validateForm } from "../controllers/formValidation";
-import { rateLimiter } from "../controllers/rateLimiter";
+import { rateLimiter } from "../controllers/express/rateLimiter";
 
 declare module "express-session" {
   export interface SessionData {

@@ -45,10 +45,18 @@ const AddFriendModal = ({ isOpen, onClose }: IFriendModalProps) => {
             socket.emit(
               "add_friend",
               values.friendName,
-              ({ errorMsg, done }: { errorMsg: string; done: boolean }) => {
+              ({
+                errorMsg,
+                done,
+                newFriend,
+              }: {
+                errorMsg: string;
+                done: boolean;
+                newFriend: any;
+              }) => {
                 if (done) {
                   //@ts-ignore
-                  setFriendList((c: any) => [values.friendName, ...c]);
+                  setFriendList((c: any) => [newFriend, ...c]);
                   closeModal();
                   return;
                 }

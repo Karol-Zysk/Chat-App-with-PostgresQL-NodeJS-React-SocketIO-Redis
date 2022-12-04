@@ -3,20 +3,18 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import http from "http";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { port } from "./config/config";
 import authRouter from "./routes/authRouter";
-import {
-  authorizeUser,
-  initializeUser,
-  addFriend,
-} from "./controllers/socketController";
-import { redisClient } from "./redis";
+
 import {
   corsConfig,
   sessionMiddleware,
   wrap,
 } from "./controllers/sessionController";
+import { addFriend } from "./socketio/addFriend";
+import { onDisconnect } from "./socketio/onDisconnect";
+import { authorizeUser } from "./socketio/authorizeUser";
 dotenv.config({ path: "config.env" });
 
 const app = express();
@@ -44,6 +42,8 @@ io.on("connect", (socket) => {
   socket.on("add_friend", (friendName, cb) => {
     addFriend(socket, friendName, cb);
   });
+
+  socket.on("disconnecting", () => onDisconnect(socket));
 });
 io.use(authorizeUser);
 
